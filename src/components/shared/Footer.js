@@ -16,14 +16,14 @@ const LightTooltip = styled(({ className, ...props }) => (
   },
 }));
 
-export default function Footer() {
+const Footer = () => {
   const srcGitHubImg = "/images/github-icon.svg";
 
   return (
     <>
       <footer className={styles.footer}>
         <Typography variant="body1" className={styles.footerTypo}>
-          <LightTooltip title="What is LUCE?" placement="left">
+          <LightTooltip title="¿Qué es LUCE?" placement="left">
             <Link
               color="inherit"
               href="https://jljorro.github.io/luce-web/"
@@ -44,11 +44,13 @@ export default function Footer() {
               href="https://github.com/mcvaliente/luce-dao"
               target="_blank"
             >
-              <img src={srcGitHubImg} alt="LUCE on GitHub" />
+              <img src={srcGitHubImg} alt="LUCE en GitHub" />
             </Link>
           </LightTooltip>
         </Typography>
       </footer>
     </>
   );
-}
+};
+
+export default Footer;

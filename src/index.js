@@ -2,17 +2,17 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import CssBaseline from "@mui/material/CssBaseline";
-import App from "./components/App";
-import { HashRouter } from "react-router-dom";
+import App from "./App";
+import { BrowserRouter as Router } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 
 ReactDOM.render(
-  <HashRouter>
+  <Router>
     <React.StrictMode>
       <CssBaseline />
       <App />
     </React.StrictMode>
-  </HashRouter>,
+  </Router>,
   document.getElementById("root")
 );
 

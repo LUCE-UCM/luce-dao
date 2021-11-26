@@ -1,16 +1,14 @@
 import React from "react";
 import Layout from "../shared/Layout";
 
-export default function Home(props) {
+const Home = () => {
   return (
     <>
-      <Layout
-        metamaskConnected={props.metamaskConnected}
-        clicked={props.clicked}
-        hideGeneralSearch={props.hideGeneralSearch}
-      >
+      <Layout>
         <h1>This is home</h1>
       </Layout>
     </>
   );
-}
+};
+
+export default Home;
