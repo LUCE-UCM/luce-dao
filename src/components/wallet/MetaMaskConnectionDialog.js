@@ -25,7 +25,7 @@ export default function MetaMaskConnectionDialog(props) {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Error de conexión con MetaMask"}
+          {"Conexión con MetaMask"}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
@@ -33,7 +33,7 @@ export default function MetaMaskConnectionDialog(props) {
             <br />
             <br />
             Por favor, cierra esta ventana y pulsa en el botón "Conectar con
-            MetaMask".
+            MetaMask" para iniciar una sesión.
             <br />
             <br />
           </DialogContentText>

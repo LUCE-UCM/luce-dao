@@ -1,11 +1,12 @@
 import React from "react";
 import Layout from "../shared/Layout";
+import NewEnrollment from "../enrolment/NewEnrollment";
 
 const Home = () => {
   return (
     <>
       <Layout>
-        <h1>This is home</h1>
+        <NewEnrollment />
       </Layout>
     </>
   );

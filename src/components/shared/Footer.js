@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "../../assets/css/Footer.module.css";
 import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography"; //or import { Typography } from '@mui/material';
+import Typography from "@mui/material/Typography"; //import { Typography } from '@mui/material';
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 

@@ -29,14 +29,16 @@ export default function MetaMaskNetworkDialog(props) {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Switch to the Rinkeby Test Network in MetaMask.
+            Cambio a la red de pruebas Rinkeby en MetaMask.
             <br />
-            Please, change your network in your MetaMask extension.
+            Por favor, cambia la red en tu extensión de MetaMask.
             <br />
-            Then close this dialog in order to reload the page and try again.
+            A continuación, cierra esta ventana para que se pueda recargar la
+            página y se actualice la información.
             <br />
             <br />
-            You're currently on: <strong>{props.currentNetwork}.</strong>
+            Actualmente estás utilizando la siguiente red:{" "}
+            <strong>{props.currentNetwork}.</strong>
           </DialogContentText>
         </DialogContent>
         <DialogActions>

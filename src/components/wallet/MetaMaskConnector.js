@@ -29,7 +29,6 @@ function MetaMaskConector() {
     //First, check if MetaMask is installed.
     const validWallet = checkMetaMask();
     setIsMetaMaskInstalled(validWallet);
-    console.log("Monedero válido: ", validWallet);
     if (validWallet) {
       //Check if MetaMask is connected using the valid Ethereum network.
       console.log("Checking network...");
@@ -55,7 +54,7 @@ function MetaMaskConector() {
             networkName = "Kovan";
             break;
           default:
-            networkName = "Unknown Ethereum network";
+            networkName = "Red Ethereum desconocida";
         }
         setNetworkName(networkName);
         setIsValidNetwork(validNetwork);
@@ -70,14 +69,18 @@ function MetaMaskConector() {
             break;
           case -32002:
             setConnectionErrorMessage(
-              "RPC Error: Request of type 'wallet_requestPermissions' already pending for this dapp."
+              "RPC Error: Petición de tipo 'wallet_requestPermissions' todavía pendiente para esta aplicación."
             );
             break;
           case 4001:
-            setConnectionErrorMessage("Unable to connect with MetaMask.");
+            setConnectionErrorMessage(
+              "No se puede realizar una conexión con MetaMask."
+            );
             break;
           default:
-            setConnectionErrorMessage("Unknown MetaMask connection error.");
+            setConnectionErrorMessage(
+              "Error desconocido en la conexión con MetaMask."
+            );
         }
         setIsMetaMaskConnected(validConnection);
       }
