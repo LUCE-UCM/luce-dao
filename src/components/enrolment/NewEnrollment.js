@@ -2,12 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   Alert,
   Button,
+  Checkbox,
   CircularProgress,
   Divider,
   Fab,
   FormControl,
   FormControlLabel,
+  FormGroup,
   FormLabel,
+  MenuItem,
   Radio,
   RadioGroup,
   TextField,
@@ -17,6 +20,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import styles from "../../assets/css/NewEnrollment.module.css";
+import { faculties, studies, courses } from "../../utils/enrollmentconfig";
 
 function NewEnrollment(props) {
   const [successNewEnrollment, setSuccessNewEnrollment] = useState(false);
@@ -27,6 +31,12 @@ function NewEnrollment(props) {
   const [gender, setGender] = useState("female");
   const [homeZip, setHomeZip] = useState("");
   const [universityZip, setUniversityZip] = useState("");
+  const [ucmAssociation, setUCMAssociation] = useState(false);
+  const [currentFaculty, setCurrentFaculty] = useState("faculty00");
+  const [currentStudy, setCurrentStudy] = useState("study00");
+  const [currentCourse, setCurrentCourse] = useState("course00");
+
+  const [otherAssociation, setOtherAssociation] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const inputActivityNumberRef = useRef();
@@ -34,6 +44,9 @@ function NewEnrollment(props) {
   const inputAgeRef = useRef();
   const inputHomeZipRef = useRef();
   const inputUniversityZipRef = useRef();
+  const inputFacultyRef = useRef();
+  const inputStudyRef = useRef();
+  const inputCourseRef = useRef();
   const generalDivRef = useRef();
 
   const addEnrollmentButtonHandler = () => {
@@ -71,6 +84,40 @@ function NewEnrollment(props) {
   const universityZipHandler = (e) => {
     const value = e.target.value;
     setUniversityZip(value);
+  };
+
+  const facultySelectHandler = (e) => {
+    //Reset the errors.
+    setErrorMessages({});
+    if (e.target.value !== "faculty00") {
+      setCurrentFaculty(e.target.value);
+      setCurrentStudy("study00");
+    }
+  };
+
+  const studySelectHandler = (e) => {
+    setErrorMessages({});
+    if (e.target.value !== "study00") {
+      setCurrentStudy(e.target.value);
+      setCurrentCourse("course00");
+    }
+  };
+
+  const courseSelectHandler = (e) => {
+    setErrorMessages({});
+    if (e.target.value !== "course00") {
+      setCurrentCourse(e.target.value);
+    }
+  };
+
+  const handleUCMAssocChange = (e) => {
+    const isChecked = e.target.checked;
+    setUCMAssociation(isChecked);
+  };
+
+  const handleOtherAssocChange = (e) => {
+    const isChecked = e.target.checked;
+    setOtherAssociation(isChecked);
   };
 
   const onSubmit = (e) => {
@@ -202,10 +249,87 @@ function NewEnrollment(props) {
           </div>
           <div className={styles.divForm}>
             <TextField
+              id="selectFaculty"
+              select
+              label="Facultad"
+              variant="outlined"
+              style={{ marginRight: "15px" }}
+              value={currentFaculty}
+              onChange={facultySelectHandler}
+              error={!!errorMessages.faculty}
+              helperText={errorMessages.faculty}
+              inputRef={inputFacultyRef}
+            >
+              <MenuItem key="faculty00" value="faculty00">
+                Seleccionar una Facultad...
+              </MenuItem>
+              {faculties.map((option) => (
+                <MenuItem key={option.id} value={option.id}>
+                  {option.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              id="selectStudy"
+              select
+              label="Estudios"
+              variant="outlined"
+              value={currentStudy}
+              onChange={studySelectHandler}
+              disabled={currentFaculty === "faculty00"}
+              style={{ marginRight: "15px" }}
+              error={!!errorMessages.study}
+              helperText={errorMessages.study}
+              inputRef={inputStudyRef}
+            >
+              <MenuItem key="study00" value="study00">
+                Seleccionar estudios...
+              </MenuItem>
+              {studies.map((option) =>
+                option.faculty === currentFaculty ? (
+                  <MenuItem
+                    key={option.id}
+                    value={option.id}
+                    data-name={option.name}
+                  >
+                    {option.name}
+                  </MenuItem>
+                ) : null
+              )}
+            </TextField>
+            <TextField
+              id="selectCourse"
+              select
+              label="Curso"
+              variant="outlined"
+              disabled={
+                currentFaculty === "faculty00" || currentStudy === "study00"
+              }
+              value={currentCourse}
+              onChange={courseSelectHandler}
+              error={!!errorMessages.course}
+              helperText={errorMessages.course}
+              inputRef={inputCourseRef}
+            >
+              <MenuItem key="course00" value="course00">
+                Seleccionar curso...
+              </MenuItem>
+              {courses.map((option) =>
+                option.study === currentStudy ? (
+                  <MenuItem key={option.id} value={option.id}>
+                    {option.name}
+                  </MenuItem>
+                ) : null
+              )}
+            </TextField>
+          </div>
+          <div className={styles.divForm}>
+            <TextField
               id="txtHomeZip"
               label="Domicilio familiar"
               placeholder="Código postal..."
               variant="outlined"
+              /** Equivalent to className = {styles.textField} **/
               style={{ marginRight: "15px" }}
               width="50ch"
               error={!!errorMessages.homeZip}
@@ -222,7 +346,7 @@ function NewEnrollment(props) {
               label="Domicilio durante curso académico"
               placeholder="Código postal..."
               variant="outlined"
-              style={{ marginRight: "15px", width: "300px" }}
+              style={{ width: "300px" }}
               width="20ch"
               error={!!errorMessages.universityZip}
               helperText={errorMessages.universityZip}
@@ -233,6 +357,34 @@ function NewEnrollment(props) {
               }}
               inputRef={inputUniversityZipRef}
             />
+          </div>
+          <div className={styles.divForm}>
+            <FormLabel component="legend">Pertenencia a asociaciones</FormLabel>{" "}
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={ucmAssociation}
+                    onChange={handleUCMAssocChange}
+                    inputProps={{ "aria-label": "controlled" }}
+                    className={styles.checkbox}
+                  />
+                }
+                label="UCM"
+                style={{ marginRight: "15px" }}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={otherAssociation}
+                    onChange={handleOtherAssocChange}
+                    inputProps={{ "aria-label": "controlled" }}
+                    className={styles.checkbox}
+                  />
+                }
+                label="Externas a UCM"
+              />
+            </FormGroup>{" "}
           </div>
           <div
             className={styles.divButtonForm}
