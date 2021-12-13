@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   Alert,
   Button,
@@ -20,7 +20,13 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import styles from "../../assets/css/NewEnrollment.module.css";
-import { faculties, studies, courses } from "../../utils/enrollmentconfig";
+import {
+  faculties,
+  studies,
+  courses,
+  associations,
+} from "../../utils/enrollmentconfig";
+import EnrollmentUCMAssociations from "./EnrollmentUCMAssociations";
 
 function NewEnrollment(props) {
   const [successNewEnrollment, setSuccessNewEnrollment] = useState(false);
@@ -31,12 +37,16 @@ function NewEnrollment(props) {
   const [gender, setGender] = useState("female");
   const [homeZip, setHomeZip] = useState("");
   const [universityZip, setUniversityZip] = useState("");
-  const [ucmAssociation, setUCMAssociation] = useState(false);
   const [currentFaculty, setCurrentFaculty] = useState("faculty00");
   const [currentStudy, setCurrentStudy] = useState("study00");
   const [currentCourse, setCurrentCourse] = useState("course00");
-
-  const [otherAssociation, setOtherAssociation] = useState(false);
+  const [memberUCMAssociation, setMemberUCMAssociation] = useState(false);
+  const [currentUCMAssocFaculty, setCurrentUCMAssocFaculty] =
+    useState("ucmAssocFaculty00");
+  const [currentUCMAssociation, setCurrentUCMAssociation] =
+    useState("ucmAssoc00");
+  const [selectedUCMAssocs, setSelectedUCMAssocs] = useState([]);
+  const [memberOtherAssociation, setMemberOtherAssociation] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const inputActivityNumberRef = useRef();
@@ -47,6 +57,8 @@ function NewEnrollment(props) {
   const inputFacultyRef = useRef();
   const inputStudyRef = useRef();
   const inputCourseRef = useRef();
+  const inputUCMAssocFacultyRef = useRef();
+  const inputUCMAssociationRef = useRef();
   const generalDivRef = useRef();
 
   const addEnrollmentButtonHandler = () => {
@@ -110,19 +122,67 @@ function NewEnrollment(props) {
     }
   };
 
-  const handleUCMAssocChange = (e) => {
+  const handleCheckBoxUCMAssocChange = (e) => {
     const isChecked = e.target.checked;
-    setUCMAssociation(isChecked);
+    setMemberUCMAssociation(isChecked);
+    if (isChecked) {
+      setCurrentUCMAssocFaculty("ucmAssocFaculty00");
+    }
   };
 
-  const handleOtherAssocChange = (e) => {
+  const ucmAssocFacultySelectHandler = (e) => {
+    //Reset the errors.
+    setErrorMessages({});
+    if (e.target.value !== "ucmAssocFaculty00") {
+      setCurrentUCMAssocFaculty(e.target.value);
+      setCurrentUCMAssociation("ucmAssoc00");
+    }
+  };
+
+  const ucmAssociationSelectHandler = (e) => {
+    let newUCMAssocId = e.target.value;
+    //This instruction is not working with this version of Material UI.
+    //let newUCMAssocName = e.currentTarget.getAttribute("data-name");
+    let newUCMAssocItem = associations.find(
+      (item) => item.id === newUCMAssocId
+    );
+    let newUCMAssocName = newUCMAssocItem.name;
+    if (newUCMAssocId !== "ucmAssoc00") {
+      let ucmAssociationsList = [...selectedUCMAssocs];
+      setCurrentUCMAssociation("ucmAssoc00");
+      //Check if the occupation is in the list yet.
+      var ucmAssociationIndex = ucmAssociationsList
+        .map((item) => {
+          return item.id;
+        })
+        .indexOf(newUCMAssocId);
+      console.log("UCM Association index: ", ucmAssociationIndex);
+      if (ucmAssociationIndex === -1) {
+        // Not found.
+        const newUCMAssociation = {
+          id: newUCMAssocId,
+          name: newUCMAssocName,
+        };
+        ucmAssociationsList.push(newUCMAssociation);
+        setSelectedUCMAssocs(ucmAssociationsList);
+      }
+    }
+  };
+
+  const deleteUCMAssociationHandler = (associationIndex) => {
+    let ucmAssociationsList = [...selectedUCMAssocs];
+    ucmAssociationsList.splice(associationIndex, 1);
+    setSelectedUCMAssocs(ucmAssociationsList);
+  };
+
+  const handleCheckBoxOtherAssocChange = (e) => {
     const isChecked = e.target.checked;
-    setOtherAssociation(isChecked);
+    setMemberOtherAssociation(isChecked);
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log("has pulsado formulario.");
+    console.log("Has pulsado guardar formulario.");
   };
 
   return (
@@ -216,7 +276,7 @@ function NewEnrollment(props) {
           </div>
           <div className={styles.divForm}>
             <FormControl component="fieldset">
-              <FormLabel component="legend">Sexo</FormLabel>
+              <FormLabel component="legend">Género</FormLabel>
               <RadioGroup
                 aria-label="gender"
                 name="studentGender"
@@ -287,11 +347,7 @@ function NewEnrollment(props) {
               </MenuItem>
               {studies.map((option) =>
                 option.faculty === currentFaculty ? (
-                  <MenuItem
-                    key={option.id}
-                    value={option.id}
-                    data-name={option.name}
-                  >
+                  <MenuItem key={option.id} value={option.id}>
                     {option.name}
                   </MenuItem>
                 ) : null
@@ -364,20 +420,80 @@ function NewEnrollment(props) {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={ucmAssociation}
-                    onChange={handleUCMAssocChange}
+                    checked={memberUCMAssociation}
+                    onChange={handleCheckBoxUCMAssocChange}
                     inputProps={{ "aria-label": "controlled" }}
                     className={styles.checkbox}
                   />
                 }
                 label="UCM"
-                style={{ marginRight: "15px" }}
+                style={{ marginRight: "15px", marginBottom: "20px" }}
               />
+              <div className={styles.divForm}>
+                <TextField
+                  id="selectUCMAssocFaculty"
+                  select
+                  label="Facultad"
+                  variant="outlined"
+                  style={{ marginRight: "15px" }}
+                  value={currentUCMAssocFaculty}
+                  onChange={ucmAssocFacultySelectHandler}
+                  error={!!errorMessages.ucmAssocFaculty}
+                  helperText={errorMessages.ucmAssocFaculty}
+                  inputRef={inputUCMAssocFacultyRef}
+                  disabled={!memberUCMAssociation}
+                >
+                  <MenuItem key="ucmAssocFaculty00" value="ucmAssocFaculty00">
+                    Seleccionar una Facultad...
+                  </MenuItem>
+                  {faculties.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  id="selectUCMAssociation"
+                  select
+                  label="Asociación UCM"
+                  variant="outlined"
+                  value={currentUCMAssociation}
+                  onChange={ucmAssociationSelectHandler}
+                  disabled={currentUCMAssocFaculty === "ucmAssocFaculty00"}
+                  style={{ marginRight: "15px" }}
+                  error={!!errorMessages.ucmAssociation}
+                  helperText={errorMessages.ucmAssociation}
+                  inputRef={inputUCMAssociationRef}
+                >
+                  <MenuItem key="ucmAssoc00" value="ucmAssoc00">
+                    Seleccionar asociación...
+                  </MenuItem>
+                  {associations.map((option) =>
+                    option.faculty === currentUCMAssocFaculty ? (
+                      <MenuItem
+                        key={option.id}
+                        value={option.id}
+                        data-name={option.name}
+                      >
+                        {option.name}
+                      </MenuItem>
+                    ) : null
+                  )}
+                </TextField>
+              </div>
+              <div>
+                <EnrollmentUCMAssociations
+                  ucmAssociations={selectedUCMAssocs}
+                  clicked={deleteUCMAssociationHandler}
+                  canDelete={true}
+                />
+              </div>
+
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={otherAssociation}
-                    onChange={handleOtherAssocChange}
+                    checked={memberOtherAssociation}
+                    onChange={handleCheckBoxOtherAssocChange}
                     inputProps={{ "aria-label": "controlled" }}
                     className={styles.checkbox}
                   />

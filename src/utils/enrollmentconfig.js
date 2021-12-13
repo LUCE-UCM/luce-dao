@@ -1,4 +1,4 @@
-//Faculties
+//Facultades
 export const faculties = [
   {
     id: "faculty01",
@@ -10,138 +10,199 @@ export const faculties = [
   },
 ];
 
+//Titulaciones
 export const studies = [
   {
-    id: "study01",
+    id: "studyfdi01",
     name: "Grado Administración y Dirección de Empresas",
     faculty: "faculty01",
   },
   {
-    id: "study02",
+    id: "studyfdi02",
     name: "Grado Desarrollo de Videojuegos",
     faculty: "faculty01",
   },
   {
-    id: "study03",
+    id: "studyfdi03",
     name: "Grado Ingeniería de Computadores",
     faculty: "faculty01",
   },
   {
-    id: "study04",
+    id: "studyfdi04",
     name: "Grado Ingeniería del Software",
     faculty: "faculty01",
   },
   {
-    id: "study05",
+    id: "studyts01",
     name: "Grado Trabajo Social",
     faculty: "faculty02",
   },
   {
-    id: "study06",
+    id: "studyts02",
     name: "Máster Estudios LGBTIQ+",
     faculty: "faculty02",
   },
   {
-    id: "study07",
+    id: "studyts03",
     name: "Máster Trabajo Social Comunitario, Gestión y Ev. Servicios Soc.",
     faculty: "faculty02",
   },
 ];
 
+//Cursos
 export const courses = [
   {
-    id: "course01",
+    id: "coursefdi0101",
     name: "1º",
-    study: "study01",
+    study: "studyfdi01",
   },
   {
-    id: "course02",
+    id: "coursefdi0102",
     name: "2º",
-    study: "study01",
+    study: "studyfdi01",
   },
   {
-    id: "course03",
+    id: "coursefdi0103",
     name: "3º",
-    study: "study01",
+    study: "studyfdi01",
   },
   {
-    id: "course04",
+    id: "coursefdi0104",
+    name: "4º",
+    study: "studyfdi01",
+  },
+  {
+    id: "coursefdi0105",
+    name: "5º",
+    study: "studyfdi01",
+  },
+  {
+    id: "coursefdi0201",
     name: "1º",
-    study: "study02",
+    study: "studyfdi02",
   },
   {
-    id: "course05",
+    id: "coursefdi0202",
     name: "2º",
-    study: "study02",
+    study: "studyfdi02",
   },
   {
-    id: "course06",
+    id: "coursefdi0203",
     name: "3º",
-    study: "study02",
+    study: "studyfdi02",
   },
   {
-    id: "course07",
+    id: "coursefdi0204",
+    name: "4º",
+    study: "studyfdi02",
+  },
+  {
+    id: "coursefdi0301",
     name: "1º",
-    study: "study03",
+    study: "studyfdi03",
   },
   {
-    id: "course08",
+    id: "coursefdi0302",
     name: "2º",
-    study: "study03",
+    study: "studyfdi03",
   },
   {
-    id: "course09",
+    id: "coursefdi0303",
     name: "3º",
-    study: "study03",
+    study: "studyfdi03",
   },
   {
-    id: "course10",
+    id: "coursefdi0304",
+    name: "4º",
+    study: "studyfdi03",
+  },
+  {
+    id: "coursefdi0401",
     name: "1º",
-    study: "study04",
+    study: "studyfdi04",
   },
   {
-    id: "course11",
+    id: "coursefdi0402",
     name: "2º",
-    study: "study04",
+    study: "studyfdi04",
   },
   {
-    id: "course12",
+    id: "coursefdi0403",
     name: "3º",
-    study: "study04",
+    study: "studyfdi04",
   },
   {
-    id: "course10",
+    id: "coursefdi0404",
+    name: "4º",
+    study: "studyfdi04",
+  },
+  {
+    id: "coursets0101",
     name: "1º",
-    study: "study05",
+    study: "studyts01",
   },
   {
-    id: "course11",
+    id: "course0102",
     name: "2º",
-    study: "study05",
+    study: "studyts01",
   },
   {
-    id: "course12",
+    id: "course0103",
     name: "3º",
-    study: "study05",
+    study: "studyts01",
   },
   {
-    id: "course13",
+    id: "course0104",
+    name: "4º",
+    study: "studyts01",
+  },
+  {
+    id: "course0201",
     name: "1º",
-    study: "study06",
+    study: "studyts02",
   },
   {
-    id: "course14",
-    name: "2º",
-    study: "study06",
-  },
-  {
-    id: "course15",
+    id: "course0301",
     name: "1º",
-    study: "study07",
+    study: "studyts03",
+  },
+];
+
+//Asociaciones
+export const associations = [
+  {
+    id: "assoc0101",
+    name: "ASCII",
+    faculty: "faculty01",
   },
   {
-    id: "course16",
-    name: "2º",
-    study: "study07",
+    id: "assoc0102",
+    name: "Diskóbolo",
+    faculty: "faculty01",
+  },
+  {
+    id: "assoc0103",
+    name: "LibreLab",
+    faculty: "faculty01",
+  },
+  {
+    id: "assoc0104",
+    name: "Ludic Association of Gamers (LAG)",
+    faculty: "faculty01",
+  },
+  {
+    id: "assoc0201",
+    name: "Trabajo Social Crítico",
+    faculty: "faculty02",
+  },
+  {
+    id: "assoc0202",
+    name: "Xti",
+    faculty: "faculty02",
+  },
+  {
+    id: "assoc0203",
+    name: "Zona IN - Asoc. Estudiantes Div. Funcional/Discapacidad",
+    faculty: "faculty02",
   },
 ];
