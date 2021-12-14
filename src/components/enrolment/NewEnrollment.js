@@ -10,6 +10,7 @@ import {
   FormControlLabel,
   FormGroup,
   FormLabel,
+  IconButton,
   MenuItem,
   Radio,
   RadioGroup,
@@ -19,6 +20,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
+import CloseIcon from "@mui/icons-material/Close";
 import styles from "../../assets/css/NewEnrollment.module.css";
 import {
   faculties,
@@ -27,6 +29,10 @@ import {
   associations,
 } from "../../utils/enrollmentconfig";
 import EnrollmentUCMAssociations from "./EnrollmentUCMAssociations";
+import {
+  checkTextField,
+  checkEmailField,
+} from "../../utils/EnrollmentFieldValidation";
 
 function NewEnrollment(props) {
   const [successNewEnrollment, setSuccessNewEnrollment] = useState(false);
@@ -48,6 +54,7 @@ function NewEnrollment(props) {
   const [selectedUCMAssocs, setSelectedUCMAssocs] = useState([]);
   const [memberOtherAssociation, setMemberOtherAssociation] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [saveBlockchain, setSaveBlockchain] = useState(false);
 
   const inputActivityNumberRef = useRef();
   const inputEmailRef = useRef();
@@ -69,37 +76,42 @@ function NewEnrollment(props) {
   };
 
   const activityNumberHandler = (e) => {
+    setErrorMessages({});
     const value = e.target.value;
     setActivityNumber(value);
   };
 
   const emailHandler = (e) => {
+    setErrorMessages({});
     const value = e.target.value;
     setEmail(value);
   };
 
   const ageHandler = (e) => {
+    setErrorMessages({});
     const value = e.target.value;
     setAge(value);
   };
 
   const genderHandler = (e) => {
+    setErrorMessages({});
     const value = e.target.value;
     setGender(value);
   };
 
   const homeZipHandler = (e) => {
+    setErrorMessages({});
     const value = e.target.value;
     setHomeZip(value);
   };
 
   const universityZipHandler = (e) => {
+    setErrorMessages({});
     const value = e.target.value;
     setUniversityZip(value);
   };
 
   const facultySelectHandler = (e) => {
-    //Reset the errors.
     setErrorMessages({});
     if (e.target.value !== "faculty00") {
       setCurrentFaculty(e.target.value);
@@ -182,7 +194,61 @@ function NewEnrollment(props) {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log("Has pulsado guardar formulario.");
+    let validEnrollment = true;
+    let errors = {};
+    let previousError = false;
+    setErrorMessages({});
+
+    try {
+      setLoading(true);
+      //FIELD VALIDATION
+      //Check Activity ID
+      console.log("Activity ID:", activityNumber);
+      validEnrollment = checkTextField(activityNumber);
+      if (!validEnrollment) {
+        errors.activityNumber =
+          "Por favor, introducir el código de la actividad.";
+        setErrorMessages(errors);
+        previousError = true;
+        inputActivityNumberRef.current.focus();
+      }
+
+      //Check email
+      validEnrollment = checkTextField(email);
+      if (!validEnrollment) {
+        errors.email = "Por favor, introducir el email del estudiante.";
+      } else {
+        validEnrollment = checkEmailField(email);
+        if (!validEnrollment) {
+          errors.email = "Por favor, introducir un email con formato válido.";
+        }
+      }
+      if (!validEnrollment) {
+        setErrorMessages(errors);
+        previousError = true;
+        inputEmailRef.current.focus();
+      }
+
+      setErrorMessages(errors);
+
+      //Check for errors.
+      if (Object.keys(errors).length === 0) {
+        setSaveBlockchain(true);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(
+        "EXCEPTION ERROR - New enrollment (onSubmit): " + error.message
+      );
+      setErrorMessages({});
+      errors.general =
+        "ERROR DE EXCEPCIÓN EN METAMASK" +
+        error.message +
+        " Para poder utilizar esta aplicación se requiere un conexión a la red de pruebas Rinkeby desde MetaMask.";
+      generalDivRef.current.focus();
+      setErrorMessages(errors);
+    }
   };
 
   return (
@@ -502,6 +568,40 @@ function NewEnrollment(props) {
               />
             </FormGroup>{" "}
           </div>
+          {!!errorMessages.general ? (
+            <Alert variant="filled" severity="error">
+              {errorMessages.general}
+            </Alert>
+          ) : null}
+          {successNewEnrollment ? (
+            <div style={{ marginTop: "20px" }}>
+              <Alert
+                severity="success"
+                variant="filled"
+                action={
+                  <Tooltip
+                    title="Cerrar si se desea registrar una nueva participación."
+                    arrow
+                  >
+                    <IconButton
+                      aria-label="close"
+                      color="inherit"
+                      size="small"
+                      onClick={() => {
+                        setSuccessNewEnrollment(false);
+                        //resetNewEnrollmentFormFields();
+                        inputActivityNumberRef.current.focus();
+                      }}
+                    >
+                      <CloseIcon fontSize="inherit" />
+                    </IconButton>
+                  </Tooltip>
+                }
+              >
+                ¡La participación se ha registrado correctamente!
+              </Alert>
+            </div>
+          ) : null}
           <div
             className={styles.divButtonForm}
             ref={generalDivRef}
