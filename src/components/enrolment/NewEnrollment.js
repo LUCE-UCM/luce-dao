@@ -26,12 +26,15 @@ import {
   faculties,
   studies,
   courses,
-  associations,
+  ucmAssociations,
+  externalAssociations,
 } from "../../utils/enrollmentconfig";
-import EnrollmentUCMAssociations from "./EnrollmentUCMAssociations";
+import EnrollmentAssociations from "./EnrollmentAssociations";
 import {
   checkTextField,
-  checkEmailField,
+  checkUCMEmailField,
+  checkListField,
+  checkNumberField,
 } from "../../utils/EnrollmentFieldValidation";
 
 function NewEnrollment(props) {
@@ -42,7 +45,7 @@ function NewEnrollment(props) {
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("female");
   const [homeZip, setHomeZip] = useState("");
-  const [universityZip, setUniversityZip] = useState("");
+  const [courseZip, setCourseZip] = useState("");
   const [currentFaculty, setCurrentFaculty] = useState("faculty00");
   const [currentStudy, setCurrentStudy] = useState("study00");
   const [currentCourse, setCurrentCourse] = useState("course00");
@@ -53,6 +56,10 @@ function NewEnrollment(props) {
     useState("ucmAssoc00");
   const [selectedUCMAssocs, setSelectedUCMAssocs] = useState([]);
   const [memberOtherAssociation, setMemberOtherAssociation] = useState(false);
+  const [currentOtherAssociation, setCurrentOtherAssociation] =
+    useState("otherAssoc00");
+  const [selectedOtherAssocs, setSelectedOtherAssocs] = useState([]);
+  const [similarActivities, setSimilarActivities] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saveBlockchain, setSaveBlockchain] = useState(false);
 
@@ -60,12 +67,13 @@ function NewEnrollment(props) {
   const inputEmailRef = useRef();
   const inputAgeRef = useRef();
   const inputHomeZipRef = useRef();
-  const inputUniversityZipRef = useRef();
+  const inputCourseZipRef = useRef();
   const inputFacultyRef = useRef();
   const inputStudyRef = useRef();
   const inputCourseRef = useRef();
   const inputUCMAssocFacultyRef = useRef();
   const inputUCMAssociationRef = useRef();
+  const inputOtherAssociationRef = useRef();
   const generalDivRef = useRef();
 
   const addEnrollmentButtonHandler = () => {
@@ -105,10 +113,10 @@ function NewEnrollment(props) {
     setHomeZip(value);
   };
 
-  const universityZipHandler = (e) => {
+  const courseZipHandler = (e) => {
     setErrorMessages({});
     const value = e.target.value;
-    setUniversityZip(value);
+    setCourseZip(value);
   };
 
   const facultySelectHandler = (e) => {
@@ -152,10 +160,11 @@ function NewEnrollment(props) {
   };
 
   const ucmAssociationSelectHandler = (e) => {
+    setErrorMessages({});
     let newUCMAssocId = e.target.value;
     //This instruction is not working with this version of Material UI.
     //let newUCMAssocName = e.currentTarget.getAttribute("data-name");
-    let newUCMAssocItem = associations.find(
+    let newUCMAssocItem = ucmAssociations.find(
       (item) => item.id === newUCMAssocId
     );
     let newUCMAssocName = newUCMAssocItem.name;
@@ -192,6 +201,46 @@ function NewEnrollment(props) {
     setMemberOtherAssociation(isChecked);
   };
 
+  const otherAssociationSelectHandler = (e) => {
+    setErrorMessages({});
+    let newOtherAssocId = e.target.value;
+    let newOtherAssocItem = externalAssociations.find(
+      (item) => item.id === newOtherAssocId
+    );
+    let newOtherAssocName = newOtherAssocItem.name;
+    if (newOtherAssocId !== "ucmAssoc00") {
+      let otherAssociationsList = [...selectedOtherAssocs];
+      setCurrentOtherAssociation("otherAssoc00");
+      //Check if the occupation is in the list yet.
+      var otherAssociationIndex = otherAssociationsList
+        .map((item) => {
+          return item.id;
+        })
+        .indexOf(newOtherAssocId);
+      console.log("Other Association index: ", otherAssociationIndex);
+      if (otherAssociationIndex === -1) {
+        // Not found.
+        const newOtherAssociation = {
+          id: newOtherAssocId,
+          name: newOtherAssocName,
+        };
+        otherAssociationsList.push(newOtherAssociation);
+        setSelectedOtherAssocs(otherAssociationsList);
+      }
+    }
+  };
+
+  const deleteOtherAssociationHandler = (associationIndex) => {
+    let otherAssociationsList = [...selectedOtherAssocs];
+    otherAssociationsList.splice(associationIndex, 1);
+    setSelectedOtherAssocs(otherAssociationsList);
+  };
+
+  const handleCheckBoxSimilarActivitiesChange = (e) => {
+    const isChecked = e.target.checked;
+    setSimilarActivities(isChecked);
+  };
+
   const onSubmit = (e) => {
     e.preventDefault();
     let validEnrollment = true;
@@ -208,25 +257,152 @@ function NewEnrollment(props) {
       if (!validEnrollment) {
         errors.activityNumber =
           "Por favor, introducir el código de la actividad.";
-        setErrorMessages(errors);
         previousError = true;
         inputActivityNumberRef.current.focus();
       }
 
       //Check email
+      console.log("email:", email);
       validEnrollment = checkTextField(email);
       if (!validEnrollment) {
         errors.email = "Por favor, introducir el email del estudiante.";
       } else {
-        validEnrollment = checkEmailField(email);
+        validEnrollment = checkUCMEmailField(email);
         if (!validEnrollment) {
-          errors.email = "Por favor, introducir un email con formato válido.";
+          errors.email =
+            "Por favor, introducir un email UCM con formato válido (ej. user@ucm.es).";
+        } else {
+          // Valid UCM email
+          /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
         }
       }
-      if (!validEnrollment) {
-        setErrorMessages(errors);
+      if (!validEnrollment && !previousError) {
         previousError = true;
         inputEmailRef.current.focus();
+      }
+
+      //Check Age
+      console.log("Age: ", age);
+      validEnrollment = checkNumberField(age);
+      if (!validEnrollment) {
+        errors.age = "Por favor, introducir la edad del estudiante.";
+        if (!previousError) {
+          previousError = true;
+          inputAgeRef.current.focus();
+        }
+      }
+
+      //Check Gender
+      console.log("Gender: ", gender);
+
+      // Check Faculty
+      console.log("Faculty: ", currentFaculty);
+      validEnrollment = checkTextField(currentFaculty);
+      if (!validEnrollment || currentFaculty === "faculty00") {
+        errors.faculty = "Por favor, indicar Facultad de estudios";
+        if (!previousError) {
+          previousError = true;
+          inputFacultyRef.current.focus();
+        }
+      }
+
+      //Check study
+      console.log("Study: ", currentStudy);
+      validEnrollment = checkTextField(currentStudy);
+      if (
+        !validEnrollment ||
+        (currentStudy === "study00" && currentFaculty !== "faculty00")
+      ) {
+        errors.study = "Por favor, indicar titulación que se están realizando.";
+        setErrorMessages(errors);
+        if (!previousError) {
+          previousError = true;
+          inputStudyRef.current.focus();
+        }
+      }
+
+      //Check Course
+      console.log("Course: ", currentCourse);
+      validEnrollment = checkTextField(currentCourse);
+      if (
+        !validEnrollment ||
+        (currentCourse === "course00" && currentStudy !== "study00")
+      ) {
+        errors.course = "Por favor, indicar el curso que se está realizando.";
+        if (!previousError) {
+          previousError = true;
+          inputCourseRef.current.focus();
+        }
+      }
+
+      //Check family zip
+      console.log("Family address: ", homeZip);
+      validEnrollment = checkNumberField(homeZip);
+      if (!validEnrollment) {
+        errors.homeZip =
+          "Por favor, introducir código postal del domicilio familiar.";
+        if (!previousError) {
+          previousError = true;
+          inputHomeZipRef.current.focus();
+        }
+      }
+
+      //Check course zip
+      console.log("Course address: ", courseZip);
+      validEnrollment = checkNumberField(courseZip);
+      if (!validEnrollment) {
+        errors.courseZip =
+          "Por favor, introducir código postal del domicilio durante el curso académico.";
+        if (!previousError) {
+          previousError = true;
+          inputCourseZipRef.current.focus();
+        }
+      }
+
+      //Check similar activities
+      console.log("Similar activities: ", similarActivities);
+
+      //Check UCM Association checkbox
+      console.log("UCM Association: ", memberUCMAssociation);
+
+      if (memberUCMAssociation) {
+        //Check UCM associations
+        console.log("UCM Associations: ", selectedUCMAssocs);
+        validEnrollment = checkListField(selectedUCMAssocs);
+        if (!validEnrollment) {
+          if (currentUCMAssocFaculty === "ucmAssocFaculty00") {
+            errors.ucmAssocFaculty =
+              "Por favor, indicar la facultad vinculada a la asociación";
+            if (!previousError) {
+              previousError = true;
+              inputUCMAssocFacultyRef.current.focus();
+            }
+          } else {
+            errors.ucmAssociation =
+              "Por favor, indicar la asociación vinculada a la facultad.";
+            if (!previousError) {
+              previousError = true;
+              inputUCMAssociationRef.current.focus();
+            }
+          }
+        }
+      }
+
+      //Check External Association checkbox
+      console.log("External Association: ", memberUCMAssociation);
+
+      if (memberOtherAssociation) {
+        //Check external associations
+        console.log("External Associations: ", selectedOtherAssocs);
+        validEnrollment = checkListField(selectedOtherAssocs);
+        if (!validEnrollment) {
+          errors.otherAssociation =
+            "Por favor, indicar una asociación externa a la UCM.";
+          if (!previousError) {
+            previousError = true;
+            inputOtherAssociationRef.current.focus();
+          }
+        }
       }
 
       setErrorMessages(errors);
@@ -319,6 +495,7 @@ function NewEnrollment(props) {
                 e.key === "Enter" && e.preventDefault();
               }}
               inputRef={inputEmailRef}
+              placeholder="user@ucm.es"
             />
             <TextField
               id="inputAge"
@@ -398,7 +575,7 @@ function NewEnrollment(props) {
             <TextField
               id="selectStudy"
               select
-              label="Estudios"
+              label="Titulación"
               variant="outlined"
               value={currentStudy}
               onChange={studySelectHandler}
@@ -409,7 +586,7 @@ function NewEnrollment(props) {
               inputRef={inputStudyRef}
             >
               <MenuItem key="study00" value="study00">
-                Seleccionar estudios...
+                Seleccionar titulación...
               </MenuItem>
               {studies.map((option) =>
                 option.faculty === currentFaculty ? (
@@ -464,20 +641,33 @@ function NewEnrollment(props) {
               inputRef={inputHomeZipRef}
             />
             <TextField
-              id="txtUniversityZip"
+              id="txtCourseZip"
               label="Domicilio durante curso académico"
               placeholder="Código postal..."
               variant="outlined"
               style={{ width: "300px" }}
               width="20ch"
-              error={!!errorMessages.universityZip}
-              helperText={errorMessages.universityZip}
-              value={universityZip}
-              onChange={universityZipHandler}
+              error={!!errorMessages.courseZip}
+              helperText={errorMessages.courseZip}
+              value={courseZip}
+              onChange={courseZipHandler}
               onKeyPress={(e) => {
                 e.key === "Enter" && e.preventDefault();
               }}
-              inputRef={inputUniversityZipRef}
+              inputRef={inputCourseZipRef}
+            />
+          </div>
+          <div className={styles.divForm}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={similarActivities}
+                  onChange={handleCheckBoxSimilarActivitiesChange}
+                  inputProps={{ "aria-label": "controlled" }}
+                  className={styles.checkbox}
+                />
+              }
+              label="Ha participado en actividades de temática similar."
             />
           </div>
           <div className={styles.divForm}>
@@ -534,27 +724,26 @@ function NewEnrollment(props) {
                   <MenuItem key="ucmAssoc00" value="ucmAssoc00">
                     Seleccionar asociación...
                   </MenuItem>
-                  {associations.map((option) =>
-                    option.faculty === currentUCMAssocFaculty ? (
+                  {ucmAssociations.map((ucmoption) =>
+                    ucmoption.faculty === currentUCMAssocFaculty ? (
                       <MenuItem
-                        key={option.id}
-                        value={option.id}
-                        data-name={option.name}
+                        key={ucmoption.id}
+                        value={ucmoption.id}
+                        data-name={ucmoption.name}
                       >
-                        {option.name}
+                        {ucmoption.name}
                       </MenuItem>
                     ) : null
                   )}
                 </TextField>
               </div>
               <div>
-                <EnrollmentUCMAssociations
-                  ucmAssociations={selectedUCMAssocs}
+                <EnrollmentAssociations
+                  associations={selectedUCMAssocs}
                   clicked={deleteUCMAssociationHandler}
                   canDelete={true}
                 />
               </div>
-
               <FormControlLabel
                 control={
                   <Checkbox
@@ -566,6 +755,41 @@ function NewEnrollment(props) {
                 }
                 label="Externas a UCM"
               />
+              <div className={styles.divForm}>
+                <TextField
+                  id="selectOtherAssociation"
+                  select
+                  label="Asociación externa a UCM"
+                  variant="outlined"
+                  value={currentOtherAssociation}
+                  onChange={otherAssociationSelectHandler}
+                  disabled={!memberOtherAssociation}
+                  style={{ marginRight: "15px" }}
+                  error={!!errorMessages.otherAssociation}
+                  helperText={errorMessages.otherAssociation}
+                  inputRef={inputOtherAssociationRef}
+                >
+                  <MenuItem key="otherAssoc00" value="otherAssoc00">
+                    Seleccionar asociación...
+                  </MenuItem>
+                  {externalAssociations.map((externaloption) => (
+                    <MenuItem
+                      key={externaloption.id}
+                      value={externaloption.id}
+                      data-name={externaloption.name}
+                    >
+                      {externaloption.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </div>
+              <div>
+                <EnrollmentAssociations
+                  associations={selectedOtherAssocs}
+                  clicked={deleteOtherAssociationHandler}
+                  canDelete={true}
+                />
+              </div>
             </FormGroup>{" "}
           </div>
           {!!errorMessages.general ? (

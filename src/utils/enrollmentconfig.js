@@ -168,41 +168,76 @@ export const courses = [
   },
 ];
 
-//Asociaciones
-export const associations = [
+//Asociaciones UCM
+export const ucmAssociations = [
   {
-    id: "assoc0101",
+    id: "ucmAssoc0101",
     name: "ASCII",
     faculty: "faculty01",
   },
   {
-    id: "assoc0102",
+    id: "ucmAssoc0102",
     name: "Diskóbolo",
     faculty: "faculty01",
   },
   {
-    id: "assoc0103",
+    id: "ucmAssoc0103",
     name: "LibreLab",
     faculty: "faculty01",
   },
   {
-    id: "assoc0104",
+    id: "ucmAssoc0104",
     name: "Ludic Association of Gamers (LAG)",
     faculty: "faculty01",
   },
   {
-    id: "assoc0201",
+    id: "ucmAssoc0105",
+    name: "Otros",
+    faculty: "faculty01",
+  },
+  {
+    id: "ucmAssoc0201",
     name: "Trabajo Social Crítico",
     faculty: "faculty02",
   },
   {
-    id: "assoc0202",
+    id: "ucmAssoc0202",
     name: "Xti",
     faculty: "faculty02",
   },
   {
-    id: "assoc0203",
+    id: "ucmAssoc0203",
     name: "Zona IN - Asoc. Estudiantes Div. Funcional/Discapacidad",
     faculty: "faculty02",
+  },
+  ,
+  {
+    id: "ucmAssoc0204",
+    name: "Otros",
+    faculty: "faculty02",
+  },
+];
+
+//Asociaciones externas UCM
+export const externalAssociations = [
+  {
+    id: "assoc0001",
+    name: "Cáritas",
+    category: "Voluntariado",
+  },
+  {
+    id: "assoc0002",
+    name: "Cruz Roja",
+    category: "Voluntariado",
+  },
+  {
+    id: "assoc0003",
+    name: "Unicef",
+    category: "Voluntariado",
+  },
+  {
+    id: "assoc0004",
+    name: "Otros",
+    category: "Otros",
   },
 ];
