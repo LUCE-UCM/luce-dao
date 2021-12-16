@@ -210,7 +210,6 @@ export const ucmAssociations = [
     name: "Zona IN - Asoc. Estudiantes Div. Funcional/Discapacidad",
     faculty: "faculty02",
   },
-  ,
   {
     id: "ucmAssoc0204",
     name: "Otros",

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import sha256 from "crypto-js/sha256";
 import {
   Alert,
   Button,
@@ -36,11 +37,12 @@ import {
   checkListField,
   checkNumberField,
 } from "../../utils/EnrollmentFieldValidation";
+import ConfirmDialog from "../shared/ConfirmDialog";
 
 function NewEnrollment(props) {
   const [successNewEnrollment, setSuccessNewEnrollment] = useState(false);
   const [errorMessages, setErrorMessages] = useState({});
-  const [activityNumber, setActivityNumber] = useState("");
+  const [activityCode, setActivityCode] = useState("");
   const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("female");
@@ -63,7 +65,7 @@ function NewEnrollment(props) {
   const [loading, setLoading] = useState(false);
   const [saveBlockchain, setSaveBlockchain] = useState(false);
 
-  const inputActivityNumberRef = useRef();
+  const inputActivityCodeRef = useRef();
   const inputEmailRef = useRef();
   const inputAgeRef = useRef();
   const inputHomeZipRef = useRef();
@@ -79,14 +81,14 @@ function NewEnrollment(props) {
   const addEnrollmentButtonHandler = () => {
     setSuccessNewEnrollment(false);
     //resetNewInvoiceFormFields();
-    //inputDocNumberRef.current.focus();
-    console.log("Has pulsado el botón para añadir un nuevo registro.");
+    inputActivityCodeRef.current.focus();
+    console.log("Clicked add button.");
   };
 
-  const activityNumberHandler = (e) => {
+  const activityCodeHandler = (e) => {
     setErrorMessages({});
     const value = e.target.value;
-    setActivityNumber(value);
+    setActivityCode(value);
   };
 
   const emailHandler = (e) => {
@@ -252,13 +254,13 @@ function NewEnrollment(props) {
       setLoading(true);
       //FIELD VALIDATION
       //Check Activity ID
-      console.log("Activity ID:", activityNumber);
-      validEnrollment = checkTextField(activityNumber);
+      console.log("Activity ID:", activityCode);
+      validEnrollment = checkTextField(activityCode);
       if (!validEnrollment) {
-        errors.activityNumber =
+        errors.activityCode =
           "Por favor, introducir el código de la actividad.";
         previousError = true;
-        inputActivityNumberRef.current.focus();
+        inputActivityCodeRef.current.focus();
       }
 
       //Check email
@@ -271,9 +273,6 @@ function NewEnrollment(props) {
         if (!validEnrollment) {
           errors.email =
             "Por favor, introducir un email UCM con formato válido (ej. user@ucm.es).";
-        } else {
-          // Valid UCM email
-          /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
         }
       }
       if (!validEnrollment && !previousError) {
@@ -418,13 +417,105 @@ function NewEnrollment(props) {
         "EXCEPTION ERROR - New enrollment (onSubmit): " + error.message
       );
       setErrorMessages({});
-      errors.general =
-        "ERROR DE EXCEPCIÓN EN METAMASK" +
-        error.message +
-        " Para poder utilizar esta aplicación se requiere un conexión a la red de pruebas Rinkeby desde MetaMask.";
+      errors.general = "Se ha producido una excepción: " + error.message;
       generalDivRef.current.focus();
       setErrorMessages(errors);
     }
+  };
+
+  const saveEnrollmentOKDialogHandler = async () => {
+    //The new enrollment can be stored in the Blockchain.
+    setSaveBlockchain(false);
+    setErrorMessages({});
+    setSuccessNewEnrollment(false);
+    setLoading(true);
+    let errors = {};
+    try {
+      //First, check that the student is included in the database.
+      /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
+      //Second, check that the student is not enrolled in this activity in the blockchain.
+      /*TODO: Comprobar que el estudiante no esté dado ya de alta en esta actividad.*/
+      //const activityHash = sha256(activityCode.toUpperCase()).toString();
+      //const bytes32ActivityId = web3.utils.fromAscii(activityHash);
+      //const studentHash = sha256(email.toLowerCase()).toString();
+      //const bytes32StudentId = web3.utils.fromAscii(studentHash);
+      //const existingEnrollment = await enrollment.methods
+      //  .enrollmentExists(bytes32ActivityId, bytes32StudentId)
+      //  .call();
+      //if (existingEnrollment) {
+      //  errors.activityCode =
+      //    "Ya existe una inscripción en esta actividad con el mismo estudiante. Por favor, revisar los datos.";
+      //  setErrorMessages(errors);
+      //  inputActivityCodeRef.current.focus();
+      //setLoading(false);
+      //} else {
+      //Fields to store in the blockchain
+      //console.log(">>> FIELDS TO STORE IN THE BLOCKCHAIN");
+      //console.log("Paid invoice:", paidInvoice);
+      //console.log("Invoice number: ", docNumber);
+      //console.log("Invoice date: ", invoiceDate);
+      //console.log("Due date: ", dueDate);
+      //console.log("VAT Base: ", vatBase);
+      //console.log("VAT Percentage: ", vatPercentage);
+      //console.log("USD Exchange rate: ", usdExchangeRate);
+      //console.log("Age: ", age);
+      //console.log("Gender: ", gender);
+      //console.log("Cooperative: ", currentCooperative);
+      //console.log("Country: ", currentCountry);
+      //console.log("Office: ", currentOffice);
+      //Request if a meta-transaction must be used or not.
+      //}
+      //Adapt fields in order to store them in the blockchain or in the database
+      //Save only the ids of the association(s) associated with the enrollment.
+      /*const ucmAssociationIds = selectedUCMAssocs.map((ucmAssoc) => {
+        return ucmAssoc.id;
+      });
+      console.log("UCM Association Ids: ", occupationIds);
+      const otherAssociations = selectedOtherAssocs.map((otherAssoc) => {
+        return otherAssoc.id;
+      });
+      console.log("UCM Association Ids: ", occupationIds);
+      //Get the current account.
+      const currentAccount = getCurrentAccount();
+      console.log("Current account: ", currentAccount);
+      await enrollment.methods
+        .createEnrollment(
+          bytes32ActivityId,
+          bytes32StudentId
+        )
+        .send({
+          from: currentAccount,
+          gas: "2000000",
+        });*/
+
+      //Checking the blockchain
+      //const totalEnrollments = await invoice.methods.getEnrollmentCount(bytes32ActivityId).call();
+      //console.log("Total enrollment: ", totalEnrollments);
+
+      setLoading(false);
+      setSuccessNewEnrollment(true);
+      generalDivRef.current.focus();
+    } catch (error) {
+      setLoading(false);
+      console.error(
+        "EXCEPTION ERROR - New enrollment MetaMask Error (saveEnrollmentOKDialogHandler): " +
+          error.message
+      );
+      setErrorMessages({});
+      errors.general =
+        "Se ha producido una excepción: " +
+        error.message +
+        " :: Para poder utilizar esta aplicación se requiere un conexión a la red de pruebas Rinkeby desde MetaMask.";
+      generalDivRef.current.focus();
+      setErrorMessages(errors);
+    }
+  };
+
+  const saveEnrollmentCancelDialogHandler = () => {
+    console.log("The enrollment will not be stored in the blockchain.");
+    setSaveBlockchain(false);
+    setErrorMessages({});
+    setSuccessNewEnrollment(false);
   };
 
   return (
@@ -464,14 +555,14 @@ function NewEnrollment(props) {
               variant="outlined"
               style={{ marginRight: "15px" }}
               width="50ch"
-              error={!!errorMessages.activityNumber}
-              helperText={errorMessages.activityNumber}
-              value={activityNumber}
-              onChange={activityNumberHandler}
+              error={!!errorMessages.activityCode}
+              helperText={errorMessages.activityCode}
+              value={activityCode}
+              onChange={activityCodeHandler}
               onKeyPress={(e) => {
                 e.key === "Enter" && e.preventDefault();
               }}
-              inputRef={inputActivityNumberRef}
+              inputRef={inputActivityCodeRef}
             />
           </div>
           <br />
@@ -804,7 +895,7 @@ function NewEnrollment(props) {
                 variant="filled"
                 action={
                   <Tooltip
-                    title="Cerrar si se desea registrar una nueva participación."
+                    title="Cerrar si se desea registrar una nueva inscripción."
                     arrow
                   >
                     <IconButton
@@ -814,7 +905,7 @@ function NewEnrollment(props) {
                       onClick={() => {
                         setSuccessNewEnrollment(false);
                         //resetNewEnrollmentFormFields();
-                        inputActivityNumberRef.current.focus();
+                        inputActivityCodeRef.current.focus();
                       }}
                     >
                       <CloseIcon fontSize="inherit" />
@@ -822,7 +913,7 @@ function NewEnrollment(props) {
                   </Tooltip>
                 }
               >
-                ¡La participación se ha registrado correctamente!
+                ¡La inscripción se ha registrado correctamente!
               </Alert>
             </div>
           ) : null}
@@ -849,6 +940,16 @@ function NewEnrollment(props) {
           <div className={styles.spacer}> </div>
         </form>
       )}
+      {saveBlockchain ? (
+        <ConfirmDialog
+          confirmPrimaryDialogHandler={saveEnrollmentOKDialogHandler}
+          confirmSecondaryDialogHandler={saveEnrollmentCancelDialogHandler}
+          dialogTitle="¿Continuar?"
+          dialogDescription="La inscripción se va almacenar en la red de pruebas Rinkeby de Ethereum."
+          primaryButton="Guardar"
+          secondaryButton="Cancelar"
+        />
+      ) : null}
     </>
   );
 }
