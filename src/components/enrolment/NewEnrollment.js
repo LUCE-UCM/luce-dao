@@ -80,7 +80,7 @@ function NewEnrollment(props) {
 
   const addEnrollmentButtonHandler = () => {
     setSuccessNewEnrollment(false);
-    //resetNewInvoiceFormFields();
+    resetNewEnrollmentFormFields();
     inputActivityCodeRef.current.focus();
     console.log("Clicked add button.");
   };
@@ -153,7 +153,6 @@ function NewEnrollment(props) {
   };
 
   const ucmAssocFacultySelectHandler = (e) => {
-    //Reset the errors.
     setErrorMessages({});
     if (e.target.value !== "ucmAssocFaculty00") {
       setCurrentUCMAssocFaculty(e.target.value);
@@ -193,12 +192,14 @@ function NewEnrollment(props) {
   };
 
   const deleteUCMAssociationHandler = (associationIndex) => {
+    setErrorMessages({});
     let ucmAssociationsList = [...selectedUCMAssocs];
     ucmAssociationsList.splice(associationIndex, 1);
     setSelectedUCMAssocs(ucmAssociationsList);
   };
 
   const handleCheckBoxOtherAssocChange = (e) => {
+    setErrorMessages({});
     const isChecked = e.target.checked;
     setMemberOtherAssociation(isChecked);
   };
@@ -233,22 +234,24 @@ function NewEnrollment(props) {
   };
 
   const deleteOtherAssociationHandler = (associationIndex) => {
+    setErrorMessages({});
     let otherAssociationsList = [...selectedOtherAssocs];
     otherAssociationsList.splice(associationIndex, 1);
     setSelectedOtherAssocs(otherAssociationsList);
   };
 
   const handleCheckBoxSimilarActivitiesChange = (e) => {
+    setErrorMessages({});
     const isChecked = e.target.checked;
     setSimilarActivities(isChecked);
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
+    setErrorMessages({});
     let validEnrollment = true;
     let errors = {};
     let previousError = false;
-    setErrorMessages({});
 
     try {
       setLoading(true);
@@ -435,9 +438,11 @@ function NewEnrollment(props) {
       /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
       //Second, check that the student is not enrolled in this activity in the blockchain.
       /*TODO: Comprobar que el estudiante no esté dado ya de alta en esta actividad.*/
-      //const activityHash = sha256(activityCode.toUpperCase()).toString();
+      const activityHash = sha256(activityCode.toUpperCase()).toString();
+      console.log("Activity hash: ", activityHash);
       //const bytes32ActivityId = web3.utils.fromAscii(activityHash);
-      //const studentHash = sha256(email.toLowerCase()).toString();
+      const studentHash = sha256(email.toLowerCase()).toString();
+      console.log("Student hash: ", studentHash);
       //const bytes32StudentId = web3.utils.fromAscii(studentHash);
       //const existingEnrollment = await enrollment.methods
       //  .enrollmentExists(bytes32ActivityId, bytes32StudentId)
@@ -515,6 +520,27 @@ function NewEnrollment(props) {
     console.log("The enrollment will not be stored in the blockchain.");
     setSaveBlockchain(false);
     setErrorMessages({});
+    setSuccessNewEnrollment(false);
+  };
+
+  const resetNewEnrollmentFormFields = () => {
+    setActivityCode("");
+    setEmail("");
+    setAge("");
+    setGender("female");
+    setHomeZip("");
+    setCourseZip("");
+    setCurrentFaculty("faculty00");
+    setCurrentStudy("study00");
+    setCurrentCourse("course00");
+    setMemberUCMAssociation(false);
+    setCurrentUCMAssocFaculty("ucmAssocFaculty00");
+    setCurrentUCMAssociation("ucmAssoc00");
+    setSelectedUCMAssocs([]);
+    setMemberOtherAssociation(false);
+    setCurrentOtherAssociation("otherAssoc00");
+    setSelectedOtherAssocs([]);
+    setSimilarActivities(false);
     setSuccessNewEnrollment(false);
   };
 
@@ -904,7 +930,7 @@ function NewEnrollment(props) {
                       size="small"
                       onClick={() => {
                         setSuccessNewEnrollment(false);
-                        //resetNewEnrollmentFormFields();
+                        resetNewEnrollmentFormFields();
                         inputActivityCodeRef.current.focus();
                       }}
                     >
