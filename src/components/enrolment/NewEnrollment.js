@@ -38,6 +38,7 @@ import {
   checkNumberField,
 } from "../../utils/EnrollmentFieldValidation";
 import ConfirmDialog from "../shared/ConfirmDialog";
+import { getCurrentAccount } from "../../utils/web3";
 
 function NewEnrollment(props) {
   const [successNewEnrollment, setSuccessNewEnrollment] = useState(false);
@@ -257,7 +258,7 @@ function NewEnrollment(props) {
       setLoading(true);
       //FIELD VALIDATION
       //Check Activity ID
-      console.log("Activity ID:", activityCode);
+      //console.log("Activity ID:", activityCode);
       validEnrollment = checkTextField(activityCode);
       if (!validEnrollment) {
         errors.activityCode =
@@ -267,7 +268,7 @@ function NewEnrollment(props) {
       }
 
       //Check email
-      console.log("email:", email);
+      //console.log("email:", email);
       validEnrollment = checkTextField(email);
       if (!validEnrollment) {
         errors.email = "Por favor, introducir el email del estudiante.";
@@ -284,7 +285,7 @@ function NewEnrollment(props) {
       }
 
       //Check Age
-      console.log("Age: ", age);
+      //console.log("Age: ", age);
       validEnrollment = checkNumberField(age);
       if (!validEnrollment) {
         errors.age = "Por favor, introducir la edad del estudiante.";
@@ -295,10 +296,10 @@ function NewEnrollment(props) {
       }
 
       //Check Gender
-      console.log("Gender: ", gender);
+      //console.log("Gender: ", gender);
 
       // Check Faculty
-      console.log("Faculty: ", currentFaculty);
+      //console.log("Faculty: ", currentFaculty);
       validEnrollment = checkTextField(currentFaculty);
       if (!validEnrollment || currentFaculty === "faculty00") {
         errors.faculty = "Por favor, indicar Facultad de estudios";
@@ -309,7 +310,7 @@ function NewEnrollment(props) {
       }
 
       //Check study
-      console.log("Study: ", currentStudy);
+      //console.log("Study: ", currentStudy);
       validEnrollment = checkTextField(currentStudy);
       if (
         !validEnrollment ||
@@ -324,7 +325,7 @@ function NewEnrollment(props) {
       }
 
       //Check Course
-      console.log("Course: ", currentCourse);
+      //console.log("Course: ", currentCourse);
       validEnrollment = checkTextField(currentCourse);
       if (
         !validEnrollment ||
@@ -338,7 +339,7 @@ function NewEnrollment(props) {
       }
 
       //Check family zip
-      console.log("Family address: ", homeZip);
+      //console.log("Family address: ", homeZip);
       validEnrollment = checkNumberField(homeZip);
       if (!validEnrollment) {
         errors.homeZip =
@@ -350,7 +351,7 @@ function NewEnrollment(props) {
       }
 
       //Check course zip
-      console.log("Course address: ", courseZip);
+      //console.log("Course address: ", courseZip);
       validEnrollment = checkNumberField(courseZip);
       if (!validEnrollment) {
         errors.courseZip =
@@ -362,14 +363,13 @@ function NewEnrollment(props) {
       }
 
       //Check similar activities
-      console.log("Similar activities: ", similarActivities);
+      //console.log("Similar activities: ", similarActivities);
 
       //Check UCM Association checkbox
-      console.log("UCM Association: ", memberUCMAssociation);
-
+      //console.log("UCM Association: ", memberUCMAssociation);
       if (memberUCMAssociation) {
         //Check UCM associations
-        console.log("UCM Associations: ", selectedUCMAssocs);
+        //console.log("UCM Associations: ", selectedUCMAssocs);
         validEnrollment = checkListField(selectedUCMAssocs);
         if (!validEnrollment) {
           if (currentUCMAssocFaculty === "ucmAssocFaculty00") {
@@ -391,11 +391,10 @@ function NewEnrollment(props) {
       }
 
       //Check External Association checkbox
-      console.log("External Association: ", memberUCMAssociation);
-
+      //console.log("External Association: ", memberOtherAssociation);
       if (memberOtherAssociation) {
         //Check external associations
-        console.log("External Associations: ", selectedOtherAssocs);
+        //console.log("External Associations: ", selectedOtherAssocs);
         validEnrollment = checkListField(selectedOtherAssocs);
         if (!validEnrollment) {
           errors.otherAssociation =
@@ -436,54 +435,47 @@ function NewEnrollment(props) {
     try {
       //First, check that the student is included in the database.
       /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
-      //Second, check that the student is not enrolled in this activity in the blockchain.
-      /*TODO: Comprobar que el estudiante no esté dado ya de alta en esta actividad.*/
-      const activityHash = sha256(activityCode.toUpperCase()).toString();
-      console.log("Activity hash: ", activityHash);
-      //const bytes32ActivityId = web3.utils.fromAscii(activityHash);
-      const studentHash = sha256(email.toLowerCase()).toString();
-      console.log("Student hash: ", studentHash);
-      //const bytes32StudentId = web3.utils.fromAscii(studentHash);
-      //const existingEnrollment = await enrollment.methods
-      //  .enrollmentExists(bytes32ActivityId, bytes32StudentId)
-      //  .call();
-      //if (existingEnrollment) {
-      //  errors.activityCode =
-      //    "Ya existe una inscripción en esta actividad con el mismo estudiante. Por favor, revisar los datos.";
-      //  setErrorMessages(errors);
-      //  inputActivityCodeRef.current.focus();
-      //setLoading(false);
-      //} else {
+      //Total fields of the form
+      console.log(">>> FORM FIELDS");
+      console.log("Activity code:", activityCode);
+      console.log("email:", email);
+      console.log("Age: ", age);
+      console.log("Gender: ", gender);
+      console.log("Faculty: ", currentFaculty);
+      console.log("Study: ", currentStudy);
+      console.log("Course: ", currentCourse);
+      console.log("Family address: ", homeZip);
+      console.log("Course address: ", courseZip);
+      console.log("Similar activities: ", similarActivities);
+      console.log("UCM Association: ", memberUCMAssociation);
+      if (memberUCMAssociation) {
+        //Adapt fields in order to store them in the blockchain or in the database
+        //Save only the ids of the association(s) associated with the enrollment.
+        const ucmAssociationIds = selectedUCMAssocs.map((ucmAssoc) => {
+          return ucmAssoc.id;
+        });
+        console.log("UCM Association Ids: ", ucmAssociationIds);
+      }
+
+      console.log("External Association: ", memberOtherAssociation);
+      if (memberOtherAssociation) {
+        const otherAssociationsIds = selectedOtherAssocs.map((otherAssoc) => {
+          return otherAssoc.id;
+        });
+        console.log("External UCM Association Ids: ", otherAssociationsIds);
+      }
+
       //Fields to store in the blockchain
-      //console.log(">>> FIELDS TO STORE IN THE BLOCKCHAIN");
-      //console.log("Paid invoice:", paidInvoice);
-      //console.log("Invoice number: ", docNumber);
-      //console.log("Invoice date: ", invoiceDate);
-      //console.log("Due date: ", dueDate);
-      //console.log("VAT Base: ", vatBase);
-      //console.log("VAT Percentage: ", vatPercentage);
-      //console.log("USD Exchange rate: ", usdExchangeRate);
-      //console.log("Age: ", age);
-      //console.log("Gender: ", gender);
-      //console.log("Cooperative: ", currentCooperative);
-      //console.log("Country: ", currentCountry);
-      //console.log("Office: ", currentOffice);
-      //Request if a meta-transaction must be used or not.
-      //}
-      //Adapt fields in order to store them in the blockchain or in the database
-      //Save only the ids of the association(s) associated with the enrollment.
-      /*const ucmAssociationIds = selectedUCMAssocs.map((ucmAssoc) => {
-        return ucmAssoc.id;
-      });
-      console.log("UCM Association Ids: ", occupationIds);
-      const otherAssociations = selectedOtherAssocs.map((otherAssoc) => {
-        return otherAssoc.id;
-      });
-      console.log("UCM Association Ids: ", occupationIds);
+      const activityHash = sha256(activityCode.toUpperCase()).toString();
+      const studentHash = sha256(email.toLowerCase()).toString();
+      console.log(">>> FIELDS TO STORE IN THE BLOCKCHAIN");
+      console.log("Activity hash:", activityHash);
+      console.log("Student hast: ", studentHash);
+
       //Get the current account.
       const currentAccount = getCurrentAccount();
       console.log("Current account: ", currentAccount);
-      await enrollment.methods
+      /*await enrollment.methods
         .createEnrollment(
           bytes32ActivityId,
           bytes32StudentId
