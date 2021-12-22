@@ -39,6 +39,7 @@ import {
 } from "../../utils/EnrollmentFieldValidation";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { getCurrentAccount } from "../../utils/web3";
+import enrollment from "../../contracts/enrollment";
 
 function NewEnrollment(props) {
   const [successNewEnrollment, setSuccessNewEnrollment] = useState(false);
@@ -470,24 +471,23 @@ function NewEnrollment(props) {
       const studentHash = sha256(email.toLowerCase()).toString();
       console.log(">>> FIELDS TO STORE IN THE BLOCKCHAIN");
       console.log("Activity hash:", activityHash);
-      console.log("Student hast: ", studentHash);
+      console.log("Student hash: ", studentHash);
 
       //Get the current account.
       const currentAccount = getCurrentAccount();
       console.log("Current account: ", currentAccount);
-      /*await enrollment.methods
-        .createEnrollment(
-          bytes32ActivityId,
-          bytes32StudentId
-        )
+      await enrollment.methods
+        .createEnrollment(activityHash, studentHash)
         .send({
           from: currentAccount,
           gas: "2000000",
-        });*/
+        });
 
       //Checking the blockchain
-      //const totalEnrollments = await invoice.methods.getEnrollmentCount(bytes32ActivityId).call();
-      //console.log("Total enrollment: ", totalEnrollments);
+      const totalEnrollments = await enrollment.methods
+        .getEnrollmentCount()
+        .call();
+      console.log("Total enrollment: ", totalEnrollments);
 
       setLoading(false);
       setSuccessNewEnrollment(true);
