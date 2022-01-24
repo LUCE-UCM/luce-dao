@@ -67,6 +67,7 @@ contract Enrollment is Owner {
     }
      
     mapping(string => ActivityEnrollment) activityEnrollments; //string represents activity id
+    event EnrollmentIssued(string activityId, string studentId);
     mapping(string => uint32) totalActivityEnrollments; //total enrollments associated with an activity.
     uint32 deployedEnrollments;
     string[] students;
@@ -82,7 +83,7 @@ contract Enrollment is Owner {
 
        
     /**
-     * @dev Check is a student is in the list of students
+     * @dev Check if a student is in the list of students
      * @param _studentId identification of student
      * @param _studentList list of students to check
     */
@@ -143,6 +144,8 @@ contract Enrollment is Owner {
         if (!activityExists(_activityId)){
             activities.push(_activityId);
         }
+
+        emit EnrollmentIssued(_activityId, _studentId);
     }
 
     function getEnrollmentCount() public view returns (uint32) {
