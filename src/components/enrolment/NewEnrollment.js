@@ -40,6 +40,7 @@ import {
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { getCurrentAccount } from "../../utils/web3";
 import enrollment from "../../contracts/enrollment";
+import axios from "axios";
 
 function NewEnrollment(props) {
   const [successNewEnrollment, setSuccessNewEnrollment] = useState(false);
@@ -434,8 +435,6 @@ function NewEnrollment(props) {
     setLoading(true);
     let errors = {};
     try {
-      //First, check that the student is included in the database.
-      /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
       //Total fields of the form
       console.log(">>> FORM FIELDS");
       console.log("Activity code:", activityCode);
@@ -473,10 +472,30 @@ function NewEnrollment(props) {
       console.log("Activity hash:", activityHash);
       console.log("Student hash: ", studentHash);
 
+      //First, check that the student is included in the database.
+      /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
       //Get the current account.
       const currentAccount = getCurrentAccount();
       console.log("Current account: ", currentAccount);
-      await enrollment.methods
+      const appName = process.env.REACT_APP_APPLICATION_NAME;
+      console.log("App name: ", appName);
+      const config = {
+        headers: {
+          //"Content-Type": "application/json",
+          Application: appName,
+          User: currentAccount,
+        },
+        params: { id: studentHash },
+      };
+      axios
+        .get(process.env.REACT_APP_API_BASE_URL + "students/student/", config)
+        .then((res) => {
+          const results = res.data;
+          console.log("Resultados de axios: ", results);
+        });
+
+      /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
+      /*await enrollment.methods
         .createEnrollment(activityHash, studentHash)
         .send({
           from: currentAccount,
@@ -487,7 +506,7 @@ function NewEnrollment(props) {
       const totalEnrollments = await enrollment.methods
         .getEnrollmentCount()
         .call();
-      console.log("Total enrollment: ", totalEnrollments);
+      console.log("Total enrollment: ", totalEnrollments);*/
 
       setLoading(false);
       setSuccessNewEnrollment(true);
