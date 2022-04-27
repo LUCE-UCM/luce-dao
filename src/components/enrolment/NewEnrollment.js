@@ -471,31 +471,51 @@ function NewEnrollment(props) {
       console.log(">>> FIELDS TO STORE IN THE BLOCKCHAIN");
       console.log("Activity hash:", activityHash);
       console.log("Student hash: ", studentHash);
-
-      //First, check that the student is included in the database.
-      /*TODO: Comprobar que el estudiante está dado de alta en la Base de datos.*/
-      //Get the current account.
       const currentAccount = getCurrentAccount();
       console.log("Current account: ", currentAccount);
       const appName = process.env.REACT_APP_APPLICATION_NAME;
       console.log("App name: ", appName);
-      const config = {
+      const activityConfig = {
         headers: {
           //"Content-Type": "application/json",
           Application: appName,
           User: currentAccount,
         },
-        params: { id: studentHash },
+        params: { activityCode: activityCode.toUpperCase() },
       };
+
+      //First, check if the activity is included in the database
       axios
-        .get(process.env.REACT_APP_API_BASE_URL + "students/student/", config)
+        .get(
+          process.env.REACT_APP_API_BASE_URL + "activities/activity",
+          activityConfig
+        )
         .then((res) => {
           const results = res.data;
-          console.log("Resultados de axios: ", results);
+          console.log("Resultados de activity axios: ", results);
         });
 
+      /**const config2 = {
+        headers: {
+          "Content-Type": "application/json",
+          Application: appName,
+          User: currentAccount,
+        },
+        data: JSON.stringify({ Username: "Testing" }),
+      };
+
+      axios
+        .post(
+          process.env.REACT_APP_API_BASE_URL + "students/student2/",
+          config2
+        )
+        .then((res) => {
+          const results = res.data;
+          console.log("Resultados de axios 2: ", results);
+        });**/
+
       /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
-      /*await enrollment.methods
+      /**await enrollment.methods
         .createEnrollment(activityHash, studentHash)
         .send({
           from: currentAccount,
