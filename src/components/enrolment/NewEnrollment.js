@@ -491,11 +491,29 @@ function NewEnrollment(props) {
           activityConfig
         )
         .then((res) => {
-          const results = res.data;
-          console.log("Resultados de activity axios: ", results);
-        });
-
-      /**const config2 = {
+          const results = res;
+          console.log("Results from axios: ", results);
+          const activityData = res.data;
+          console.log("Activity data: ", activityData);
+          if (activityData.error !== null) {
+            if (activityData.error.message === "DB_ERROR_MESSAGE_400") {
+              //Activity not found.
+              setLoading(false);
+              errors.activityCode =
+                "Código de actividad no registrado. Por favor, introduzca un código válido.";
+              setErrorMessages(errors);
+              inputActivityCodeRef.current.focus();
+            } else {
+              setLoading(false);
+              setErrorMessages({});
+              errors.general =
+                "Se ha producido una excepción al comprobar el código de actividad en la Base de datos: " +
+                activityData.error.message;
+              generalDivRef.current.focus();
+              setErrorMessages(errors);
+            }
+          } else {
+            /**const config2 = {
         headers: {
           "Content-Type": "application/json",
           Application: appName,
@@ -514,8 +532,8 @@ function NewEnrollment(props) {
           console.log("Resultados de axios 2: ", results);
         });**/
 
-      /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
-      /**await enrollment.methods
+            /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
+            /**await enrollment.methods
         .createEnrollment(activityHash, studentHash)
         .send({
           from: currentAccount,
@@ -528,9 +546,11 @@ function NewEnrollment(props) {
         .call();
       console.log("Total enrollment: ", totalEnrollments);*/
 
-      setLoading(false);
-      setSuccessNewEnrollment(true);
-      generalDivRef.current.focus();
+            setLoading(false);
+            setSuccessNewEnrollment(true);
+            generalDivRef.current.focus();
+          }
+        });
     } catch (error) {
       setLoading(false);
       console.error(
