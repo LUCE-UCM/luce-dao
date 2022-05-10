@@ -492,7 +492,7 @@ function NewEnrollment(props) {
         )
         .then((res) => {
           const results = res;
-          console.log("Results from axios: ", results);
+          console.log("Results from axios (activity): ", results);
           const activityData = res.data;
           console.log("Activity data: ", activityData);
           if (activityData.error !== null) {
@@ -513,27 +513,47 @@ function NewEnrollment(props) {
               setErrorMessages(errors);
             }
           } else {
-            /**const config2 = {
-        headers: {
-          "Content-Type": "application/json",
-          Application: appName,
-          User: currentAccount,
-        },
-        data: JSON.stringify({ Username: "Testing" }),
-      };
-
-      axios
-        .post(
-          process.env.REACT_APP_API_BASE_URL + "students/student2/",
-          config2
-        )
-        .then((res) => {
-          const results = res.data;
-          console.log("Resultados de axios 2: ", results);
-        });**/
-
-            /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
-            /**await enrollment.methods
+            const studentConfig = {
+              headers: {
+                //"Content-Type": "application/json",
+                Application: appName,
+                User: currentAccount,
+              },
+              params: { studentEmail: email.toUpperCase() },
+            };
+            //Next, check if the student is included in the database
+            axios
+              .get(
+                process.env.REACT_APP_API_BASE_URL +
+                  "students/student/checkemail",
+                studentConfig
+              )
+              .then((studentRes) => {
+                const studentResults = studentRes;
+                console.log("Results from axios (student): ", studentResults);
+                const studentData = studentRes.data;
+                console.log("Student data: ", studentData);
+                if (studentData.error !== null) {
+                  if (studentData.error.message === "DB_ERROR_MESSAGE_401") {
+                    //Student not found.
+                    setLoading(false);
+                    errors.email =
+                      "Estudiante no registrado. Por favor, introduzca un email válido.";
+                    setErrorMessages(errors);
+                    inputEmailRef.current.focus();
+                  } else {
+                    setLoading(false);
+                    setErrorMessages({});
+                    errors.general =
+                      "Se ha producido una excepción al comprobar el email del estudiante en la Base de datos: " +
+                      studentData.error.message;
+                    generalDivRef.current.focus();
+                    setErrorMessages(errors);
+                  }
+                } else {
+                  //Todo va bien
+                  /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
+                  /**await enrollment.methods
         .createEnrollment(activityHash, studentHash)
         .send({
           from: currentAccount,
@@ -545,10 +565,11 @@ function NewEnrollment(props) {
         .getEnrollmentCount()
         .call();
       console.log("Total enrollment: ", totalEnrollments);*/
-
-            setLoading(false);
-            setSuccessNewEnrollment(true);
-            generalDivRef.current.focus();
+                  setLoading(false);
+                  setSuccessNewEnrollment(true);
+                  generalDivRef.current.focus();
+                }
+              });
           }
         });
     } catch (error) {
