@@ -490,29 +490,28 @@ function NewEnrollment(props) {
           process.env.REACT_APP_API_BASE_URL + "activities/activity",
           activityConfig
         )
-        .then((res) => {
-          const results = res;
-          console.log("Results from axios (activity): ", results);
-          const activityData = res.data;
+        .then((activityRes) => {
+          console.log("Results from axios (activity): ", activityRes);
+          const activityData = activityRes.data;
           console.log("Activity data: ", activityData);
           if (activityData.error !== null) {
+            setLoading(false);
+            setErrorMessages({});
             if (activityData.error.message === "DB_ERROR_MESSAGE_400") {
               //Activity not found.
-              setLoading(false);
               errors.activityCode =
                 "Código de actividad no registrado. Por favor, introduzca un código válido.";
-              setErrorMessages(errors);
               inputActivityCodeRef.current.focus();
             } else {
-              setLoading(false);
-              setErrorMessages({});
               errors.general =
                 "Se ha producido una excepción al comprobar el código de actividad en la Base de datos: " +
                 activityData.error.message;
               generalDivRef.current.focus();
-              setErrorMessages(errors);
             }
+            setErrorMessages(errors);
           } else {
+            //The activity is stored in the database.
+            //Next, check if the student is included in the database.
             const studentConfig = {
               headers: {
                 //"Content-Type": "application/json",
@@ -521,7 +520,6 @@ function NewEnrollment(props) {
               },
               params: { studentEmail: email.toUpperCase() },
             };
-            //Next, check if the student is included in the database
             axios
               .get(
                 process.env.REACT_APP_API_BASE_URL +
@@ -529,45 +527,85 @@ function NewEnrollment(props) {
                 studentConfig
               )
               .then((studentRes) => {
-                const studentResults = studentRes;
-                console.log("Results from axios (student): ", studentResults);
+                console.log("Results from axios (student): ", studentRes);
                 const studentData = studentRes.data;
                 console.log("Student data: ", studentData);
                 if (studentData.error !== null) {
+                  setLoading(false);
+                  setErrorMessages({});
                   if (studentData.error.message === "DB_ERROR_MESSAGE_401") {
                     //Student not found.
-                    setLoading(false);
                     errors.email =
                       "Estudiante no registrado. Por favor, introduzca un email válido.";
-                    setErrorMessages(errors);
                     inputEmailRef.current.focus();
                   } else {
-                    setLoading(false);
-                    setErrorMessages({});
                     errors.general =
                       "Se ha producido una excepción al comprobar el email del estudiante en la Base de datos: " +
                       studentData.error.message;
                     generalDivRef.current.focus();
-                    setErrorMessages(errors);
                   }
+                  setErrorMessages(errors);
                 } else {
-                  //Todo va bien
-                  /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
-                  /**await enrollment.methods
-        .createEnrollment(activityHash, studentHash)
-        .send({
-          from: currentAccount,
-          gas: "2000000",
-        });
+                  //The student is stored in the database.
+                  //Store the enrollment.
+                  axios
+                    .post(
+                      process.env.REACT_APP_API_BASE_URL +
+                        "activities/activity/student/new",
+                      {
+                        ActivityCode: activityCode,
+                        StudentEmail: email,
+                        ActivityHash: activityHash,
+                        StudentHash: studentHash,
+                      },
+                      {
+                        headers: { "content-type": "text/json" },
+                      }
+                    )
+                    .then(async (enrollmentRes) => {
+                      console.log(
+                        "Results from axios (enrollment): ",
+                        enrollmentRes
+                      );
+                      const enrollmentData = enrollmentRes.data;
+                      console.log("Enrollment data: ", enrollmentData);
+                      if (enrollmentData.error !== null) {
+                        //The student is enrolled yet in this activity.
+                        setLoading(false);
+                        setErrorMessages({});
+                        if (
+                          enrollmentData.error.message ===
+                          "DB_ERROR_MESSAGE_402"
+                        ) {
+                          errors.general =
+                            "El estudiante ya se encuentra registrado en esta actividad.";
+                        } else {
+                          errors.general =
+                            "Se ha producido una excepción al comprobar el email del estudiante en la Base de datos: " +
+                            enrollmentData.error.message;
+                        }
+                        generalDivRef.current.focus();
+                        setErrorMessages(errors);
+                      } else {
+                        //Todo va bien
+                        /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
+                        await enrollment.methods
+                          .createEnrollment(activityHash, studentHash)
+                          .send({
+                            from: currentAccount,
+                            gas: "2000000",
+                          });
 
-      //Checking the blockchain
-      const totalEnrollments = await enrollment.methods
-        .getEnrollmentCount()
-        .call();
-      console.log("Total enrollment: ", totalEnrollments);*/
-                  setLoading(false);
-                  setSuccessNewEnrollment(true);
-                  generalDivRef.current.focus();
+                        //Checking the blockchain
+                        const totalEnrollments = await enrollment.methods
+                          .getEnrollmentCount()
+                          .call();
+                        console.log("Total enrollment: ", totalEnrollments);
+                        setLoading(false);
+                        setSuccessNewEnrollment(true);
+                        generalDivRef.current.focus();
+                      }
+                    });
                 }
               });
           }
