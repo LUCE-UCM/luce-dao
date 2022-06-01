@@ -48,7 +48,7 @@ function NewEnrollment(props) {
   const [activityCode, setActivityCode] = useState("");
   const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
-  const [gender, setGender] = useState("female");
+  const [gender, setGender] = useState("FE");
   const [homeZip, setHomeZip] = useState("");
   const [courseZip, setCourseZip] = useState("");
   const [currentFaculty, setCurrentFaculty] = useState("faculty00");
@@ -448,18 +448,20 @@ function NewEnrollment(props) {
       console.log("Course address: ", courseZip);
       console.log("Similar activities: ", similarActivities);
       console.log("UCM Association: ", memberUCMAssociation);
+      var ucmAssociationIds = [];
       if (memberUCMAssociation) {
         //Adapt fields in order to store them in the blockchain or in the database
         //Save only the ids of the association(s) associated with the enrollment.
-        const ucmAssociationIds = selectedUCMAssocs.map((ucmAssoc) => {
+        ucmAssociationIds = selectedUCMAssocs.map((ucmAssoc) => {
           return ucmAssoc.id;
         });
         console.log("UCM Association Ids: ", ucmAssociationIds);
       }
 
+      var otherAssociationsIds = [];
       console.log("External Association: ", memberOtherAssociation);
       if (memberOtherAssociation) {
-        const otherAssociationsIds = selectedOtherAssocs.map((otherAssoc) => {
+        otherAssociationsIds = selectedOtherAssocs.map((otherAssoc) => {
           return otherAssoc.id;
         });
         console.log("External UCM Association Ids: ", otherAssociationsIds);
@@ -557,6 +559,15 @@ function NewEnrollment(props) {
                         StudentEmail: email,
                         ActivityHash: activityHash,
                         StudentHash: studentHash,
+                        StudentAge: age,
+                        StudentGender: gender,
+                        StudentCurrentZip: courseZip,
+                        StudentFamilyZip: homeZip,
+                        StudentStudy: currentStudy,
+                        StudentCourse: currentCourse,
+                        StudentSimilarActivities: similarActivities,
+                        StudentUCMAssociations: ucmAssociationIds,
+                        StudentOtherAssociations: otherAssociationsIds,
                       },
                       {
                         headers: { "content-type": "text/json" },
@@ -587,23 +598,38 @@ function NewEnrollment(props) {
                         generalDivRef.current.focus();
                         setErrorMessages(errors);
                       } else {
-                        //Todo va bien
-                        /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
-                        await enrollment.methods
-                          .createEnrollment(activityHash, studentHash)
-                          .send({
-                            from: currentAccount,
-                            gas: "2000000",
-                          });
+                        try {
+                          //Todo va bien
+                          /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
+                          await enrollment.methods
+                            .createEnrollment(activityHash, studentHash)
+                            .send({
+                              from: currentAccount,
+                              gas: "2000000",
+                            });
 
-                        //Checking the blockchain
-                        const totalEnrollments = await enrollment.methods
-                          .getEnrollmentCount()
-                          .call();
-                        console.log("Total enrollment: ", totalEnrollments);
-                        setLoading(false);
-                        setSuccessNewEnrollment(true);
-                        generalDivRef.current.focus();
+                          //Checking the blockchain
+                          const totalEnrollments = await enrollment.methods
+                            .getEnrollmentCount()
+                            .call();
+                          console.log("Total enrollment: ", totalEnrollments);
+                          setLoading(false);
+                          setSuccessNewEnrollment(true);
+                          generalDivRef.current.focus();
+                        } catch (error) {
+                          //It executes when user rejects the transaction, for example.
+                          //<TODO>: Delete the enrollment in the database.
+                          setLoading(false);
+                          console.error(
+                            "EXCEPTION ERROR - New enrollment MetaMask Error (saveEnrollmentOKDialogHandler): " +
+                              error.message
+                          );
+                          setErrorMessages({});
+                          errors.general =
+                            "Se ha producido una excepción: " + error.message;
+                          generalDivRef.current.focus();
+                          setErrorMessages(errors);
+                        }
                       }
                     });
                 }
@@ -755,22 +781,22 @@ function NewEnrollment(props) {
                 row
               >
                 <FormControlLabel
-                  value="female"
+                  value="FE"
                   control={<Radio className={styles.radio} />}
                   label="Mujer"
                 />
                 <FormControlLabel
-                  value="male"
+                  value="MA"
                   control={<Radio className={styles.radio} />}
                   label="Hombre"
                 />
                 <FormControlLabel
-                  value="nobinary"
+                  value="NB"
                   control={<Radio className={styles.radio} />}
                   label="No binario"
                 />
                 <FormControlLabel
-                  value="other"
+                  value="NC"
                   control={<Radio className={styles.radio} />}
                   label="Otro"
                 />
@@ -842,7 +868,7 @@ function NewEnrollment(props) {
               </MenuItem>
               {courses.map((option) =>
                 option.study === currentStudy ? (
-                  <MenuItem key={option.id} value={option.id}>
+                  <MenuItem key={option.id} value={option.course}>
                     {option.name}
                   </MenuItem>
                 ) : null
