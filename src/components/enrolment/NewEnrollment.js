@@ -600,7 +600,6 @@ function NewEnrollment(props) {
                       } else {
                         try {
                           //Todo va bien
-                          /*De momento no guardamos en la blockhain mientras estemos en modo prueba con Api REST*/
                           await enrollment.methods
                             .createEnrollment(activityHash, studentHash)
                             .send({
@@ -618,17 +617,54 @@ function NewEnrollment(props) {
                           generalDivRef.current.focus();
                         } catch (error) {
                           //It executes when user rejects the transaction, for example.
-                          //<TODO>: Delete the enrollment in the database.
-                          setLoading(false);
-                          console.error(
-                            "EXCEPTION ERROR - New enrollment MetaMask Error (saveEnrollmentOKDialogHandler): " +
-                              error.message
-                          );
-                          setErrorMessages({});
-                          errors.general =
-                            "Se ha producido una excepción: " + error.message;
-                          generalDivRef.current.focus();
-                          setErrorMessages(errors);
+                          //The student is stored in the database.
+                          //Store the enrollment.
+                          axios
+                            .post(
+                              process.env.REACT_APP_API_BASE_URL +
+                                "activities/activity/student/delete",
+                              {
+                                ActivityCode: activityCode,
+                                StudentEmail: email,
+                              },
+                              {
+                                headers: { "content-type": "text/json" },
+                              }
+                            )
+                            .then((enrollmentDeletionRes) => {
+                              console.log(
+                                "Results from axios (enrollment): ",
+                                enrollmentDeletionRes
+                              );
+                              const enrollmentDeletionData =
+                                enrollmentDeletionRes.data;
+                              console.log(
+                                "Enrollment data: ",
+                                enrollmentDeletionData
+                              );
+                              if (enrollmentDeletionData.error !== null) {
+                                //The student is enrolled yet in this activity.
+                                setLoading(false);
+                                errors.general =
+                                  "Se ha producido una excepción al itentar eliminar la partipación en la Base de datos por fallo en la Blockchain: " +
+                                  enrollmentDeletionData.error.message;
+                                generalDivRef.current.focus();
+                                setErrorMessages(errors);
+                              } else {
+                                //The enrollment has been deleted
+                                setLoading(false);
+                                console.error(
+                                  "EXCEPTION ERROR - New enrollment MetaMask Error (saveEnrollmentOKDialogHandler): " +
+                                    error.message
+                                );
+                                setErrorMessages({});
+                                errors.general =
+                                  "Se ha producido una excepción al intentar grabar la participación en la Blockchain: " +
+                                  error.message;
+                                generalDivRef.current.focus();
+                                setErrorMessages(errors);
+                              }
+                            });
                         }
                       }
                     });
