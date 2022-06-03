@@ -26,7 +26,7 @@ const Footer = () => {
           <LightTooltip title="¿Qué es LUCE?" placement="left">
             <Link
               color="inherit"
-              href="https://jljorro.github.io/luce-web/"
+              href="https://luce-ucm.github.io/luce-web/"
               target="_blank"
               underline="none"
             >
